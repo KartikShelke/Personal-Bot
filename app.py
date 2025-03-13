@@ -3,6 +3,8 @@ import os
 import time
 import datetime
 import speech_recognition as sr
+import speech_recognition as sr
+
 
 # Configure medicine reminder time
 medicine_time = "09:00"  # Time to remind for medicine (24-hour format)
