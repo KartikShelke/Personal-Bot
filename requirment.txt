@@ -1,3 +1,4 @@
 streamlit==1.0.0
 SpeechRecognition==3.8.1
 speechrecognition
+python-3.10
