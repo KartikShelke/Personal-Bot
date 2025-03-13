@@ -8,6 +8,11 @@ except ModuleNotFoundError:
     subprocess.run([sys.executable, "-m", "pip", "install", "SpeechRecognition"])
     import speech_recognition as sr
 
+import os
+os.system('pip install --upgrade --force-reinstall SpeechRecognition')
+import speech_recognition as sr
+
+
 import streamlit as st
 import os
 import time
