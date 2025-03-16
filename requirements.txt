@@ -1,3 +1,9 @@
+streamlit==1.43.2
+SpeechRecognition==3.8.1
+python-dotenv
+numpy
+pandas
+requests
 streamlit
 google-generativeai
 speechrecognition
