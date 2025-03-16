@@ -78,5 +78,6 @@ def main():
         else:
             speak("I'm sorry, I didn't understand that.")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
+
     main()
