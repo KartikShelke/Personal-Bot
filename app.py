@@ -1,8 +1,6 @@
 import streamlit as st
-import time
 import os
 import datetime
-import speech_recognition as sr
 import google.generativeai as genai
 
 # Configure Gemini API key
@@ -21,12 +19,6 @@ voice_gender = "f" # 'm' for male, 'f' for female
 def speak(text):
 """Converts text to speech."""
 st.write(f"**AI:** {text}") # Display AI text in the Streamlit app
-
-
-def listen():
-"""Listens for user input via microphone (not functional in Streamlit)."""
-st.warning("Listening is not available in the web interface.")
-return None
 
 
 def generate_response(prompt):
