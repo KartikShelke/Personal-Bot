@@ -1,4 +1,5 @@
 python3.10
 espeak-ng
+portaudio19-dev
 
 libespeak1
