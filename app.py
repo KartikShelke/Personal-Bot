@@ -17,7 +17,7 @@ import queue
 import av
 
 # ✅ Load API key securely
-API_KEY = os.getenv("AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o")  # Store this in Streamlit secrets or a .env file
+API_KEY = os.getenv("GENAI_API_KEY")  # Store this in Streamlit secrets or a .env file
 if not API_KEY:
     st.error("API key is missing. Set 'GENAI_API_KEY' as an environment variable.")
     st.stop()
