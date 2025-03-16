@@ -1,8 +1,6 @@
-streamlit==1.0.0
+streamlit==1.43.2
 SpeechRecognition==3.8.1
-speechrecognition
-python-3.10
-SpeechRecognition
-pyaudio
-pydub
-
+python-dotenv
+numpy
+pandas
+requests
