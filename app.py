@@ -4,7 +4,8 @@ import datetime
 import google.generativeai as genai
 
 # Configure Gemini API key
-API_KEY = os.getenv("GENAI_API_KEY") # Set API key as an environment variable
+API_KEY = "AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o"
+API_KEY = os.getenv("AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o") # Set API key as an environment variable
 genai.configure(api_key=API_KEY)
 
 # Configure medicine reminder time
