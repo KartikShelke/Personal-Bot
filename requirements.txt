@@ -5,3 +5,9 @@ python-dotenv
 numpy
 pandas
 requests
+streamlit
+google-generativeai
+speechrecognition
+pyttsx3
+pyaudio
+
