@@ -1,13 +1,7 @@
-streamlit==1.43.2
-SpeechRecognition==3.8.1
-google-generativeai
-python-dotenv
-numpy
-pandas
-requests
 streamlit
 google-generativeai
 speechrecognition
 pyttsx3
 pyaudio
-
+pypiwin32 ; sys_platform == "win32"
+espeak ; sys_platform == "linux"
