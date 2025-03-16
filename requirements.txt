@@ -1,5 +1,6 @@
 streamlit==1.43.2
 SpeechRecognition==3.8.1
+google-generativeai
 python-dotenv
 numpy
 pandas
