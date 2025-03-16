@@ -9,5 +9,10 @@ pyttsx3
 pyaudio
 pypiwin32 ; sys_platform == "win32"
 pyaudio==0.2.14
+streamlit_webrtc
+speechrecognition
+numpy
+av
+
 
 
