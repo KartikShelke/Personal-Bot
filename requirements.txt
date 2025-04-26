@@ -13,6 +13,9 @@ streamlit_webrtc
 speechrecognition
 numpy
 av
-
+streamlit==1.19.0
+google-generativeai
+SpeechRecognition
+PyAudio
 
 
