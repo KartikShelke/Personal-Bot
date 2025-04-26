@@ -1,9 +1,6 @@
 streamlit==1.43.2
-streamlit-webrtc==0.46.0
+streamlit-webrtc
 SpeechRecognition==3.8.1
 numpy
 av
-requests
 google-generativeai
-pyaudio ; sys_platform == "win32"
-python-dotenv
