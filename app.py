@@ -18,15 +18,16 @@ def main():
 
     st.sidebar.write("Developed by [Kartik]")
 
+    # Initialize the audio recorder component
     english_recorder = audio_recorder(text='Speak', icon_size="2x", icon_name="microphone-lines", key="english_recorder")
 
-    # Check if the recorder is not empty
     if english_recorder is not None:
+        # Ensure each recording is handled independently
         with st.container():
             col1, col2 = st.columns(2)
 
             with col2:
-                # Display the audio file
+                # Display the recorded audio
                 st.header('🧑')
                 st.audio(english_recorder)
 
@@ -38,19 +39,19 @@ def main():
                 text = audio_to_text(temp_english_recording_path)
                 st.success(text)
 
-                # Remove the temporary file
+                # Remove the temporary file after processing
                 os.remove(temp_english_recording_path)
 
-        # Get response text from LLM model
+        # Generate the AI response based on the converted text
         response_text = llmModelResponse(text)
 
-        # Check if the response text exists
+        # Display the response
         if response_text:
             with st.container():
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    # Convert the response text to speech and get HTML
+                    # Convert the response text to speech (voice response)
                     response_audio_html = response_to_audio(response_text)
 
                     st.header('🤖')
@@ -59,9 +60,8 @@ def main():
                     # Display the response in text format as well
                     st.info(response_text)
 
-
 def audio_to_text(temp_english_recording_path):
-    # Speech Recognition
+    # Speech Recognition to convert audio to text
     recognizer = sr.Recognizer()
     with sr.AudioFile(temp_english_recording_path) as source:
         english_recoded_voice = recognizer.record(source)
@@ -74,6 +74,7 @@ def audio_to_text(temp_english_recording_path):
             return "Sorry, my speech service is down"
 
 def response_to_audio(text, lang='en'):
+    # Convert text response to speech using gTTS
     tts = gTTS(text=text, lang=lang)
     tts_audio_path = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False).name
     tts.save(tts_audio_path)
@@ -81,14 +82,15 @@ def response_to_audio(text, lang='en'):
     # Get the base64 string of the audio file
     audio_base64 = get_audio_base64(tts_audio_path)
 
-    # Autoplay audio using HTML and JavaScript
+    # HTML to autoplay the audio response
     audio_html = f"""
     <audio controls autoplay>
         <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
     """
-    # Remove the temporary audio file after serving it
+    
+    # Clean up the audio file after it's used
     os.remove(tts_audio_path)
     return audio_html
 
