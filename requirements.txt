@@ -1,6 +1,11 @@
 streamlit==1.43.2
-streamlit-webrtc
 SpeechRecognition==3.8.1
+python-dotenv
 numpy
-av
+pandas
+requests
 google-generativeai
+pyttsx3
+pyaudio==0.2.14
+streamlit-webrtc==0.45.0  # <--- ADD this line
+av  # required by streamlit-webrtc
