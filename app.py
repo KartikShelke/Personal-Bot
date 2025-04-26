@@ -1,133 +1,115 @@
-import streamlit as st
-import os
-import datetime
 import google.generativeai as genai
+import os
+import time
+import datetime
+import speech_recognition as sr
 
 # Configure Gemini API key
 API_KEY = "AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o"
-import streamlit as st
-import os
-import datetime
-import google.generativeai as genai
-import speech_recognition as sr
-import pyttsx3
-from streamlit_webrtc import webrtc_streamer
-import numpy as np
-import queue
-import av
-
-# ✅ Load API key securely
-API_KEY = os.getenv("GENAI_API_KEY")  # Store this in Streamlit secrets or a .env file
-if not API_KEY:
-    st.error("API key is missing. Set 'GENAI_API_KEY' as an environment variable.")
-    st.stop()
-
 genai.configure(api_key=API_KEY)
 
-# ✅ Configure reminders
-MEDICINE_TIME = "09:00"
-STORY_TIME = "18:00"
+# Configure medicine reminder time
+medicine_time = "09:00"  # Time to remind for medicine (24-hour format)
+story_time = "18:00"  # Time to remind for story (24-hour format)
 
-# ✅ Initialize TTS and Speech Recognition
-recognizer = sr.Recognizer()
-tts_engine = pyttsx3.init()
-tts_engine.setProperty("rate", 150)
-tts_engine.setProperty("volume", 1)
+# Voice configuration (change language and gender)
+voice_language = "en"  # Options: 'en' for English, 'hn' for Hindi, 'es' for Spanish, etc.
+voice_gender = "f"  # 'm' for male, 'f' for female
 
-# ✅ Queue for WebRTC audio processing
-audio_queue = queue.Queue()
 
-# 🔹 Function: Convert Text to Speech
 def speak(text):
-    """Converts text to speech and displays it."""
-    st.write(f"**AI:** {text}")
-    tts_engine.say(text)
-    tts_engine.runAndWait()
+    """Converts text to speech using eSpeak with adjusted pitch and speed."""
+    print(f"AI: {text}")  # Debug print
+    os.system(f'espeak -v {voice_language}+{voice_gender} -p 50 -s 120 "{text}"')
 
-# 🔹 Function: Listen via WebRTC Microphone
-def audio_callback(frame: av.AudioFrame):
-    """Receives audio from the user's microphone."""
-    audio = np.frombuffer(frame.to_ndarray(), np.int16)
-    audio_queue.put(audio)
 
-# 🔹 Function: Recognize Speech from Audio
-def recognize_audio():
-    """Processes live audio from queue and converts to text."""
-    while not audio_queue.empty():
-        audio_data = audio_queue.get()
+def listen():
+    """Listens for user input and returns the recognized text."""
+    recognizer = sr.Recognizer()
+
+    with sr.Microphone() as source:
+        print("🎤 Listening...")  # Debug print
+        recognizer.adjust_for_ambient_noise(source, duration=1)
+
         try:
-            audio = sr.AudioData(audio_data.tobytes(), 16000, 2)
+            audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
+            print("🎧 Processing audio...")  # Debug print
             text = recognizer.recognize_google(audio)
-            st.write(f"**You:** {text}")
-            return text
+            print(f"You said: {text}")
+            return text.lower()
         except sr.UnknownValueError:
-            st.warning("Could not understand audio. Try again.")
+            speak("Sorry, I didn't catch that.")
+            return None
         except sr.RequestError:
-            st.error("Speech recognition service unavailable.")
-    return None
+            speak("Speech service unavailable.")
+            return None
+        except sr.WaitTimeoutError:
+            speak("You didn't say anything.")
+            return None
 
-# 🔹 Function: Get AI Response
+
 def generate_response(prompt):
-    """Generates AI response using Gemini API."""
+    """Uses Gemini AI to generate responses like ChatGPT."""
+    print(f"🔍 Generating AI response for: {prompt}")  # Debug print
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
-        return response.text if response else "I'm not sure how to respond."
+        response_lines = response.text.split('\n', 1)
+        return response_lines[0] + "\n" + response_lines[1] if len(response_lines) > 1 else response_lines[0]
     except Exception as e:
-        st.error(f"Error: {e}")
+        print(f"❌ Error: {e}")
+        speak("There was an error generating the response.")
         return None
 
-# 🔹 Function: Get Current Time
-def get_time():
-    return datetime.datetime.now().strftime("%H:%M")
 
-# 🔹 Function: Medicine Reminder
+def get_time():
+    """Returns the current time."""
+    now = datetime.datetime.now()
+    return now.strftime("%H:%M")
+
+
 def remind_medicine():
-    if get_time() == MEDICINE_TIME:
+    """Remind to take medicine."""
+    current_time = get_time()
+    if current_time == medicine_time:
         speak("Now it's time to take your medicine.")
 
-# 🔹 Function: Story Reminder
+
 def tell_story():
-    if get_time() == STORY_TIME:
+    """Tells grandpa to share a story."""
+    current_time = get_time()
+    if current_time == story_time:
         speak("Grandpa, tell me a story, I'm getting bored!")
 
-# 🔹 Function: Memory Game Prompt
+
 def play_memory_game():
+    """Tells grandpa to play a memory game."""
     speak("Grandpa, let's play a memory game together!")
 
-# 🔹 Main App Logic
-def main():
-    st.title("🗣️ AI Voice Assistant")
-
-    # ✅ Medicine and Story Reminders
-    remind_medicine()
-    tell_story()
-
-    # ✅ Voice or Text Input
-    st.subheader("Choose Input Mode:")
-    input_mode = st.radio("Select input type:", ("🎤 Voice", "⌨️ Text"))
-
-    user_input = None
-    if input_mode == "🎤 Voice":
-        webrtc_ctx = webrtc_streamer(key="speech", audio_receiver_size=1024, audio_processor_factory=audio_callback)
-        if webrtc_ctx and webrtc_ctx.state.playing:
-            user_input = recognize_audio()
-    else:
-        user_input = st.text_input("You:", key="user_input")
-
-    if user_input:
-        if "exit" in user_input.lower() or "goodbye" in user_input.lower():
-            speak("Goodbye! Have a great day.")
-        elif "what time is it" in user_input.lower():
-            speak(f"The time is {get_time()}.")
-        elif "tell me a story" in user_input.lower():
-            tell_story()
-        elif "play a memory game" in user_input.lower():
-            play_memory_game()
-        else:
-            response = generate_response(user_input)
-            if response:
-                speak(response)
 
 if __name__ == "__main__":
-    main()
+    speak("Good morning!")  # Greet the user
+
+    while True:
+        remind_medicine()
+        tell_story()
+
+        user_input = listen()
+
+        if user_input:
+            if "exit" in user_input or "goodbye" in user_input:
+                speak("Goodbye! Have a great day.")
+                break
+            elif "what time is it" in user_input:
+                current_time = get_time()
+                speak(f"The time is {current_time}.")
+            elif "tell me a story" in user_input:
+                tell_story()
+            elif "play a memory game" in user_input:
+                play_memory_game()
+            else:
+                response = generate_response(user_input)
+                if response:
+                    speak(response)
+
+        time.sleep(10)
