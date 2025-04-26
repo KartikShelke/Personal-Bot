@@ -9,3 +9,5 @@ google-generativeai
 pyttsx3
 pyaudio==0.2.14
 av
+altair==4.2.2
+
