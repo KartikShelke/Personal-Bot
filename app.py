@@ -16,12 +16,11 @@ def main():
     st.title("🎤 :blue[English Voice Chatbot] 💬🤖")
     st.subheader('Record your voice and get a response from the "AI Voice Bot"', divider='rainbow')
 
-    
-
     st.sidebar.write("Developed by [Kartik]")
 
     english_recorder = audio_recorder(text='Speak', icon_size="2x", icon_name="microphone-lines", key="english_recorder")
 
+    # Check if the recorder is not empty
     if english_recorder is not None:
         with st.container():
             col1, col2 = st.columns(2)
@@ -42,19 +41,23 @@ def main():
                 # Remove the temporary file
                 os.remove(temp_english_recording_path)
 
+        # Get response text from LLM model
         response_text = llmModelResponse(text)
 
-        with st.container():
-            col1, col2 = st.columns(2)
+        # Check if the response text exists
+        if response_text:
+            with st.container():
+                col1, col2 = st.columns(2)
 
-            with col1:
-                # Convert the response text to speech
-                response_audio_html = response_to_audio(response_text)
+                with col1:
+                    # Convert the response text to speech and get HTML
+                    response_audio_html = response_to_audio(response_text)
 
-                st.header('🤖')
-                st.markdown(response_audio_html, unsafe_allow_html=True)
+                    st.header('🤖')
+                    st.markdown(response_audio_html, unsafe_allow_html=True)
 
-                st.info(response_text)
+                    # Display the response in text format as well
+                    st.info(response_text)
 
 
 def audio_to_text(temp_english_recording_path):
@@ -85,6 +88,8 @@ def response_to_audio(text, lang='en'):
         Your browser does not support the audio element.
     </audio>
     """
+    # Remove the temporary audio file after serving it
+    os.remove(tts_audio_path)
     return audio_html
 
 # Function to encode the audio file to base64
