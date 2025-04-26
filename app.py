@@ -5,8 +5,9 @@ import queue
 import time
 import datetime
 import google.generativeai as genai
+import os
 
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, ClientSettings
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, ClientSettings, WebRtcMode
 import speech_recognition as sr
 
 # Configure Gemini API key
@@ -87,7 +88,7 @@ def generate_response(prompt):
 # Start WebRTC microphone streamer
 webrtc_ctx = webrtc_streamer(
     key="speech",
-    mode="sendonly",
+    mode=WebRtcMode.SENDONLY,  # <<< CORRECT WAY (use Enum)
     audio_receiver_size=256,
     client_settings=ClientSettings(
         media_stream_constraints={"audio": True, "video": False},
