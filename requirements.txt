@@ -1,9 +1,8 @@
 streamlit
-SpeechRecognition 
-gtts 
-audio_recorder_streamlit
+SpeechRecognition
+gtts
+audio-recorder-streamlit
 transformers
 torch
-google.generativeai
+google-generativeai
 python-dotenv
-
