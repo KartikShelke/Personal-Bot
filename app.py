@@ -1,49 +1,39 @@
 import streamlit as st
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
+import speech_recognition as sr
+import queue
 import av
 import numpy as np
-import queue
 import time
 import datetime
 import google.generativeai as genai
-import os
-
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, ClientSettings, WebRtcMode
-import speech_recognition as sr
 
 # Configure Gemini API key
-API_KEY = "AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o"
+API_KEY = "AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o"  # Replace with your own
 genai.configure(api_key=API_KEY)
 
-# Voice configuration
-voice_language = "en"  # Language code
-voice_gender = "f"     # 'm' for male, 'f' for female
+# Streamlit UI
+st.title("🎙️ Voice Assistant (WebRTC)")
+st.write("Speak into your mic. The assistant will listen and respond using Gemini AI.")
 
-# Set up Streamlit app
-st.title("🎙️ WebRTC Voice Assistant")
-st.write("Talk to your personal AI assistant through your browser mic! 🎤")
-
-# Queue to receive audio frames
+# Audio queue for streaming
 audio_queue = queue.Queue()
 
-# Custom Audio Processor
-class AudioProcessor(AudioProcessorBase):
-    def recv_audio(self, frame: av.AudioFrame) -> av.AudioFrame:
-        audio_data = frame.to_ndarray()
-        audio_queue.put(audio_data)
+# Custom audio processor
+class AudioProcessor:
+    def recv(self, frame: av.AudioFrame):
+        audio = frame.to_ndarray()
+        audio_queue.put(audio)
         return frame
 
-# Function to recognize speech
+# Function to recognize speech from the audio queue
 def recognize_from_queue():
     recognizer = sr.Recognizer()
-    mic = sr.Microphone()
-
-    with mic as source:
-        recognizer.adjust_for_ambient_noise(source)
 
     audio_data = []
     start_time = time.time()
 
-    # Collect audio frames for 5 seconds
+    # Collect audio for 5 seconds
     while time.time() - start_time < 5:
         try:
             frame = audio_queue.get(timeout=1)
@@ -54,29 +44,21 @@ def recognize_from_queue():
     if not audio_data:
         return None
 
-    # Concatenate frames
+    # Convert to flat audio buffer
     audio_data = np.concatenate(audio_data, axis=1).flatten()
 
     # Create AudioData object
-    sample_rate = 48000  # default for WebRTC
-    sample_width = 2     # 16 bits
-
-    audio = sr.AudioData(audio_data.tobytes(), sample_rate, sample_width)
+    audio = sr.AudioData(audio_data.tobytes(), 48000, 2)
 
     try:
         text = recognizer.recognize_google(audio)
         return text.lower()
     except sr.UnknownValueError:
-        return None
+        return "Sorry, I didn't catch that."
     except sr.RequestError:
-        return None
+        return "Speech service unavailable."
 
-# Function to speak
-def speak(text):
-    st.text(f"🧠 AI: {text}")  # Display text
-    os.system(f'espeak -v {voice_language}+{voice_gender} -p 50 -s 120 "{text}"')
-
-# Function to generate AI response
+# Generate Gemini response
 def generate_response(prompt):
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
@@ -85,34 +67,31 @@ def generate_response(prompt):
     except Exception:
         return "Sorry, I couldn't generate a response."
 
-# Start WebRTC microphone streamer
+# Start WebRTC
 webrtc_ctx = webrtc_streamer(
     key="speech",
-    mode=WebRtcMode.SENDONLY,  # <<< CORRECT WAY (use Enum)
-    audio_receiver_size=256,
+    mode=WebRtcMode.SENDONLY,
+    in_audio_enabled=True,
     client_settings=ClientSettings(
         media_stream_constraints={"audio": True, "video": False},
+        rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
     ),
     audio_processor_factory=AudioProcessor,
 )
 
-# Start button
-if st.button("🎤 Start Talking"):
-    st.info("Speak something! Listening for 5 seconds...")
+# Run assistant loop
+if webrtc_ctx.state.playing:
+    st.info("Listening... Speak now!")
 
-    user_input = recognize_from_queue()
-
-    if user_input:
-        st.success(f"✅ You said: {user_input}")
-
-        if "exit" in user_input or "goodbye" in user_input:
-            speak("Goodbye! Have a great day.")
-        elif "what time is it" in user_input:
-            current_time = datetime.datetime.now().strftime("%H:%M")
-            speak(f"The time is {current_time}.")
-        else:
-            response = generate_response(user_input)
-            if response:
-                speak(response)
-    else:
-        st.warning("❌ Didn't catch that. Please try again.")
+    if st.button("🗣️ Process Speech"):
+        user_input = recognize_from_queue()
+        if user_input:
+            st.markdown(f"**You said:** {user_input}")
+            if "exit" in user_input or "goodbye" in user_input:
+                st.success("Goodbye! Have a great day.")
+            elif "time" in user_input:
+                now = datetime.datetime.now().strftime("%H:%M")
+                st.markdown(f"🕒 Current time: **{now}**")
+            else:
+                ai_reply = generate_response(user_input)
+                st.markdown(f"**AI says:** {ai_reply}")
