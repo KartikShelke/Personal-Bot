@@ -1,12 +1,8 @@
-streamlit==1.19.0  # Or any version that fits your requirements
-streamlit-webrtc==0.45.0
-SpeechRecognition==3.8.1
+streamlit
+SpeechRecognition 
+gtts 
+audio_recorder_streamlit
+transformers
+torch
+google.generativeai
 python-dotenv
-numpy
-pandas
-requests
-google-generativeai
-pyttsx3
-av
-altair==4.2.2
-
