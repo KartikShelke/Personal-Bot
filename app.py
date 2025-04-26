@@ -8,7 +8,7 @@ import tempfile
 import google.generativeai as genai
 
 # Directly add the API key here
-GEMINI_API_KEY = "your-api-key-here"  # Replace with your actual API key
+GEMINI_API_KEY = "AIzaSyCKdsk-0yZG9FSzyj51sq6ZzVLlOhOO95o"  # Replace with your actual API key
 
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -16,21 +16,9 @@ def main():
     st.title("🎤 :blue[English Voice Chatbot] 💬🤖")
     st.subheader('Record your voice and get a response from the "AI Voice Bot"', divider='rainbow')
 
-    st.sidebar.header("About English Voice Chatbot", divider='rainbow')
-    st.sidebar.write(f'''This is an English voice chatbot created using Streamlit. It takes in English voice input and responds in English voice''')
     
-    st.sidebar.info(f'''Development process includes these steps.  
-    1️⃣ Convert Voice into text, using Google's speech recognition API.  
-    2️⃣ Give text to LLM (I used Gemini), and generate a response.
-    3️⃣ Convert LLM-generated text into speech by using Google TTS API.  
-    And boom, 🚀 ''')
 
-    st.sidebar.write("")  # Adds one line of space
-    st.sidebar.write("")  # Adds one line of space
-    st.sidebar.write("")  # Adds one line of space
-    st.sidebar.write("")  # Adds one line of space
-
-    st.sidebar.write("Developed by [Mubeen F.] (https://mubeenf.com)")
+    st.sidebar.write("Developed by [Kartik]")
 
     english_recorder = audio_recorder(text='Speak', icon_size="2x", icon_name="microphone-lines", key="english_recorder")
 
